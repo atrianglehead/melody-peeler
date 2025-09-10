@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MIDI Note Grid</title>
+  <style>
+    canvas {
+      border: 1px solid #ccc;
+      display: block;
+    }
+    #controls {
+      margin-top: 8px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="pianoRoll" width="800" height="600"></canvas>
+  <div id="controls">
+    <label><input type="checkbox" id="pitchLayer" checked /> Pitch</label>
+    <label><input type="checkbox" id="durationLayer" checked /> Duration</label>
+    <label><input type="checkbox" id="loudnessLayer" checked /> Loudness</label>
+    <label style="margin-left:10px;">Loudness
+      <input type="range" id="velocity" min="1" max="127" value="100" />
+    </label>
+    <button id="play">Play</button>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
