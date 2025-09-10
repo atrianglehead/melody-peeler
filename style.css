@@ -1,0 +1,17 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+#controls {
+  margin-bottom: 10px;
+}
+
+#grid {
+  border: 1px solid #ccc;
+  cursor: crosshair;
+}
+
+.note {
+  position: absolute;
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MIDI Canvas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="controls">
+    <button id="play">Play</button>
+    <label><input type="checkbox" id="toggleVelocity" checked> Loudness layer</label>
+    <label> Loudness:
+      <input type="range" id="velocity" min="0" max="1" step="0.01" value="0.8">
+    </label>
+  </div>
+  <canvas id="grid" width="800" height="360"></canvas>
+  <script src="script.js"></script>
+</body>
+</html>
