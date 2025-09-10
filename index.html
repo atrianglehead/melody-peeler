@@ -15,7 +15,7 @@
   </style>
 </head>
 <body>
-  <canvas id="pianoRoll" width="800" height="600"></canvas>
+  <canvas id="pianoRoll" width="840" height="600"></canvas>
   <div id="controls">
     <label><input type="checkbox" id="pitchLayer" checked /> Pitch</label>
     <label><input type="checkbox" id="durationLayer" checked /> Duration</label>
@@ -23,7 +23,14 @@
     <label style="margin-left:10px;">Loudness
       <input type="range" id="velocity" min="1" max="127" value="100" />
     </label>
-    <button id="play">Play</button>
+    <button id="play">&#9654;</button>
+    <button id="stop">&#9632;</button>
+    <label style="margin-left:10px;">Tempo
+      <input type="range" id="tempo" min="40" max="240" value="120" />
+    </label>
+    <label><input type="checkbox" id="tempoLines" checked /> Tempo Lines</label>
+    <label><input type="checkbox" id="tempoClick" /> Tempo Click</label>
+    <label><input type="checkbox" id="discreteTime" checked /> Discrete Time</label>
   </div>
   <script src="app.js"></script>
 </body>
