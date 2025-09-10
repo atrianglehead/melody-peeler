@@ -5,6 +5,7 @@ const pitchLayer = document.getElementById('pitchLayer');
 const durationLayer = document.getElementById('durationLayer');
 const loudnessLayer = document.getElementById('loudnessLayer');
 const discreteTime = document.getElementById('discreteTime');
+const snapToggle = document.getElementById('snap');
 const velocitySlider = document.getElementById('velocity');
 const tempoSlider = document.getElementById('tempo');
 const playBtn = document.getElementById('play');
@@ -64,9 +65,11 @@ canvas.addEventListener('mousedown', (e) => {
   } else {
     mode = 'new';
     const pitch = yToPitch(y);
-    const initialWidth = discreteTime.checked ? currentBeatWidth / 4 : 1;
+    const step = currentBeatWidth / 4;
+    const startX = snapToggle.checked ? Math.round(x / step) * step : x;
+    const initialWidth = discreteTime.checked ? step : 1;
     currentNote = {
-      x,
+      x: startX,
       width: initialWidth,
       pitch,
       velocity: defaultVelocity
@@ -89,7 +92,12 @@ canvas.addEventListener('mousemove', (e) => {
       currentNote.width = width;
     }
   } else if (mode === 'move') {
-    currentNote.x = x - dragOffsetX;
+    let newX = x - dragOffsetX;
+    if (snapToggle.checked) {
+      const step = currentBeatWidth / 4;
+      newX = Math.round(newX / step) * step;
+    }
+    currentNote.x = newX;
     if (pitchLayer.checked) {
       currentNote.pitch = yToPitch(y - dragOffsetY);
     }
