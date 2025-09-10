@@ -79,6 +79,19 @@ canvas.addEventListener('mouseup', () => {
   mode = null;
 });
 
+canvas.addEventListener('dblclick', (e) => {
+  const { x, y } = getMousePos(e);
+  const note = getNoteAt(x, y);
+  if (note) {
+    notes.splice(notes.indexOf(note), 1);
+    if (selectedNote === note) {
+      selectNote(null);
+    } else {
+      draw();
+    }
+  }
+});
+
 velocitySlider.addEventListener('input', () => {
   if (selectedNote && loudnessLayer.checked) {
     selectedNote.velocity = parseInt(velocitySlider.value, 10);
