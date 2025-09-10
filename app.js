@@ -154,6 +154,13 @@ function drawGrid() {
     ctx.lineTo(canvas.width, i);
     ctx.stroke();
   }
+  const beatWidth = 0.5 / baseTimePerPixel; // pixels per beat at current scale
+  for (let x = 0; x <= canvas.width; x += beatWidth) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
 }
 
 function draw() {
