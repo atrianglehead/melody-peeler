@@ -68,7 +68,11 @@ function snapWidth(value) {
   return Math.max(grid, Math.round(value / grid) * grid);
 }
 
-canvas.addEventListener('mousedown', (e) => {
+// Enable dragging on both mouse and touch devices using Pointer Events
+canvas.style.touchAction = 'none';
+
+canvas.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
   const { x, y } = getMousePos(e);
   const gridX = x - leftMargin;
   if (gridX < 0) return;
@@ -96,9 +100,10 @@ canvas.addEventListener('mousedown', (e) => {
     notes.push(currentNote);
     selectNote(currentNote);
   }
+  canvas.setPointerCapture(e.pointerId);
 });
 
-canvas.addEventListener('mousemove', (e) => {
+canvas.addEventListener('pointermove', (e) => {
   if (!currentNote) return;
   const { x, y } = getMousePos(e);
   const gridX = x - leftMargin;
@@ -119,7 +124,8 @@ canvas.addEventListener('mousemove', (e) => {
   draw();
 });
 
-canvas.addEventListener('mouseup', () => {
+canvas.addEventListener('pointerup', (e) => {
+  canvas.releasePointerCapture(e.pointerId);
   currentNote = null;
   mode = null;
 });
