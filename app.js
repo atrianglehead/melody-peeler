@@ -258,13 +258,15 @@ function togglePlay() {
 function startPlayback() {
   if (notes.length === 0) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  isPlaying = true;
-  playBtn.textContent = '⏸';
-  playbackStart = audioCtx.currentTime - playheadOffset;
-  notes.forEach(n => n.started = false);
-  lastBeat = Math.floor(playheadOffset / beatDuration);
-  endTime = notes.reduce((m, n) => Math.max(m, n.x + (durationLayer.checked ? n.width : defaultWidth)), 0) * timePerPixel;
-  animate();
+  audioCtx.resume().then(() => {
+    isPlaying = true;
+    playBtn.textContent = '⏸';
+    playbackStart = audioCtx.currentTime - playheadOffset;
+    notes.forEach(n => n.started = false);
+    lastBeat = Math.floor(playheadOffset / beatDuration);
+    endTime = notes.reduce((m, n) => Math.max(m, n.x + (durationLayer.checked ? n.width : defaultWidth)), 0) * timePerPixel;
+    animate();
+  });
 }
 
 function pausePlayback() {
