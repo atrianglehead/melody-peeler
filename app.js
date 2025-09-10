@@ -25,7 +25,14 @@ let playbackTimer = null;
 let playheadX = 0;
 let playStartTime = 0;
 let playheadRAF = null;
-let timePerPixel = baseTimePerPixel; // updated on play
+let timePerPixel = baseTimePerPixel;
+
+function getBeatWidth() {
+  const tempo = parseInt(tempoSlider.value, 10);
+  return (60 / tempo) / baseTimePerPixel;
+}
+
+let currentBeatWidth = getBeatWidth();
 
 function pitchToY(pitch) {
   return (maxPitch - pitch) * noteHeight;
@@ -108,6 +115,18 @@ velocitySlider.addEventListener('input', () => {
   }
 });
 
+tempoSlider.addEventListener('input', () => {
+  const newBeatWidth = getBeatWidth();
+  const scale = newBeatWidth / currentBeatWidth;
+  for (const note of notes) {
+    note.x *= scale;
+    note.width *= scale;
+  }
+  playheadX *= scale;
+  currentBeatWidth = newBeatWidth;
+  draw();
+});
+
 pitchLayer.addEventListener('change', updateControls);
 durationLayer.addEventListener('change', updateControls);
 loudnessLayer.addEventListener('change', updateControls);
@@ -154,7 +173,7 @@ function drawGrid() {
     ctx.lineTo(canvas.width, i);
     ctx.stroke();
   }
-  const beatWidth = 0.5 / baseTimePerPixel; // pixels per beat at current scale
+  const beatWidth = currentBeatWidth; // pixels per beat based on tempo
   for (let x = 0; x <= canvas.width; x += beatWidth) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
@@ -197,8 +216,6 @@ function updatePlayhead() {
 function playNotes() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const now = audioCtx.currentTime;
-  const tempo = parseInt(tempoSlider.value, 10);
-  timePerPixel = baseTimePerPixel * 120 / tempo;
   playStartTime = now;
   playheadX = 0;
   draw();
