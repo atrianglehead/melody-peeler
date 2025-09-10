@@ -22,6 +22,10 @@ canvas.height = pitchCount * noteHeight;
 let audioCtx = null;
 let isPlaying = false;
 let playbackTimer = null;
+let playheadX = 0;
+let playStartTime = 0;
+let playheadRAF = null;
+let timePerPixel = baseTimePerPixel; // updated on play
 
 function pitchToY(pitch) {
   return (maxPitch - pitch) * noteHeight;
@@ -167,15 +171,31 @@ function draw() {
       ctx.strokeRect(note.x, y, width, noteHeight - 1);
     }
   }
+  ctx.strokeStyle = 'red';
+  ctx.beginPath();
+  ctx.moveTo(playheadX, 0);
+  ctx.lineTo(playheadX, canvas.height);
+  ctx.stroke();
 }
 
 draw();
+
+function updatePlayhead() {
+  if (!isPlaying || !audioCtx) return;
+  playheadX = (audioCtx.currentTime - playStartTime) / timePerPixel;
+  draw();
+  playheadRAF = requestAnimationFrame(updatePlayhead);
+}
 
 function playNotes() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const now = audioCtx.currentTime;
   const tempo = parseInt(tempoSlider.value, 10);
-  const timePerPixel = baseTimePerPixel * 120 / tempo;
+  timePerPixel = baseTimePerPixel * 120 / tempo;
+  playStartTime = now;
+  playheadX = 0;
+  draw();
+  playheadRAF = requestAnimationFrame(updatePlayhead);
   let endTime = now;
   for (const note of notes) {
     const osc = audioCtx.createOscillator();
@@ -202,6 +222,7 @@ function playNotes() {
 
 function stopPlayback() {
   if (audioCtx) {
+    playheadX = (audioCtx.currentTime - playStartTime) / timePerPixel;
     audioCtx.close();
     audioCtx = null;
   }
@@ -209,6 +230,11 @@ function stopPlayback() {
     clearTimeout(playbackTimer);
     playbackTimer = null;
   }
+  if (playheadRAF) {
+    cancelAnimationFrame(playheadRAF);
+    playheadRAF = null;
+  }
   isPlaying = false;
   playBtn.textContent = '\u25B6';
+  draw();
 }
