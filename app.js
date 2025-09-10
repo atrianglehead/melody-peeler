@@ -18,6 +18,10 @@ const timePerPixel = 0.01; // seconds per pixel
 const pitchCount = maxPitch - minPitch + 1;
 canvas.height = pitchCount * noteHeight;
 
+let audioCtx = null;
+let isPlaying = false;
+let playbackTimer = null;
+
 function pitchToY(pitch) {
   return (maxPitch - pitch) * noteHeight;
 }
@@ -103,7 +107,13 @@ pitchLayer.addEventListener('change', updateControls);
 durationLayer.addEventListener('change', updateControls);
 loudnessLayer.addEventListener('change', updateControls);
 
-playBtn.addEventListener('click', playNotes);
+playBtn.addEventListener('click', () => {
+  if (isPlaying) {
+    stopPlayback();
+  } else {
+    playNotes();
+  }
+});
 
 function updateControls() {
   velocitySlider.disabled = !loudnessLayer.checked || !selectedNote;
@@ -161,8 +171,9 @@ function draw() {
 draw();
 
 function playNotes() {
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const now = audioCtx.currentTime;
+  let endTime = now;
   for (const note of notes) {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -170,10 +181,31 @@ function playNotes() {
     const duration = (durationLayer.checked ? note.width : defaultWidth) * timePerPixel;
     const velocity = (loudnessLayer.checked ? note.velocity : defaultVelocity) / 127;
     const freq = 440 * Math.pow(2, (pitch - 69) / 12);
-    osc.frequency.setValueAtTime(freq, now + note.x * timePerPixel);
+    const startTime = now + note.x * timePerPixel;
+    const stopTime = startTime + duration;
+    endTime = Math.max(endTime, stopTime);
+    osc.frequency.setValueAtTime(freq, startTime);
     gain.gain.value = velocity;
     osc.connect(gain).connect(audioCtx.destination);
-    osc.start(now + note.x * timePerPixel);
-    osc.stop(now + note.x * timePerPixel + duration);
+    osc.start(startTime);
+    osc.stop(stopTime);
   }
+  isPlaying = true;
+  playBtn.textContent = '\u23F8';
+  playbackTimer = setTimeout(() => {
+    stopPlayback();
+  }, (endTime - now) * 1000);
+}
+
+function stopPlayback() {
+  if (audioCtx) {
+    audioCtx.close();
+    audioCtx = null;
+  }
+  if (playbackTimer) {
+    clearTimeout(playbackTimer);
+    playbackTimer = null;
+  }
+  isPlaying = false;
+  playBtn.textContent = '\u25B6';
 }
