@@ -4,6 +4,7 @@ const ctx = canvas.getContext('2d');
 const pitchLayer = document.getElementById('pitchLayer');
 const durationLayer = document.getElementById('durationLayer');
 const loudnessLayer = document.getElementById('loudnessLayer');
+const discreteTime = document.getElementById('discreteTime');
 const velocitySlider = document.getElementById('velocity');
 const tempoSlider = document.getElementById('tempo');
 const playBtn = document.getElementById('play');
@@ -63,9 +64,10 @@ canvas.addEventListener('mousedown', (e) => {
   } else {
     mode = 'new';
     const pitch = yToPitch(y);
+    const initialWidth = discreteTime.checked ? currentBeatWidth / 4 : 1;
     currentNote = {
       x,
-      width: 1,
+      width: initialWidth,
       pitch,
       velocity: defaultVelocity
     };
@@ -79,7 +81,12 @@ canvas.addEventListener('mousemove', (e) => {
   const { x, y } = getMousePos(e);
   if (mode === 'new' || mode === 'resize') {
     if (durationLayer.checked) {
-      currentNote.width = Math.max(1, x - currentNote.x);
+      let width = Math.max(1, x - currentNote.x);
+      if (discreteTime.checked) {
+        const step = currentBeatWidth / 4;
+        width = Math.max(step, Math.round(width / step) * step);
+      }
+      currentNote.width = width;
     }
   } else if (mode === 'move') {
     currentNote.x = x - dragOffsetX;
@@ -130,6 +137,7 @@ tempoSlider.addEventListener('input', () => {
 pitchLayer.addEventListener('change', updateControls);
 durationLayer.addEventListener('change', updateControls);
 loudnessLayer.addEventListener('change', updateControls);
+discreteTime.addEventListener('change', updateControls);
 
 playBtn.addEventListener('click', () => {
   if (isPlaying) {
