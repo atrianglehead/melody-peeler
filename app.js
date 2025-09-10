@@ -5,6 +5,7 @@ const pitchLayer = document.getElementById('pitchLayer');
 const durationLayer = document.getElementById('durationLayer');
 const loudnessLayer = document.getElementById('loudnessLayer');
 const velocitySlider = document.getElementById('velocity');
+const tempoSlider = document.getElementById('tempo');
 const playBtn = document.getElementById('play');
 
 const noteHeight = 10; // pixels per semitone
@@ -13,7 +14,7 @@ const minPitch = 24;
 const defaultPitch = 60;
 const defaultWidth = 40; // px
 const defaultVelocity = 100;
-const timePerPixel = 0.01; // seconds per pixel
+const baseTimePerPixel = 0.01; // seconds per pixel at 120 bpm
 
 const pitchCount = maxPitch - minPitch + 1;
 canvas.height = pitchCount * noteHeight;
@@ -173,6 +174,8 @@ draw();
 function playNotes() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const now = audioCtx.currentTime;
+  const tempo = parseInt(tempoSlider.value, 10);
+  const timePerPixel = baseTimePerPixel * 120 / tempo;
   let endTime = now;
   for (const note of notes) {
     const osc = audioCtx.createOscillator();
