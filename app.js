@@ -99,7 +99,11 @@ canvas.addEventListener('mousemove', (e) => {
     }
     currentNote.x = newX;
     if (pitchLayer.checked) {
-      currentNote.pitch = yToPitch(y - dragOffsetY);
+      const newPitch = yToPitch(y - dragOffsetY);
+      if (newPitch !== currentNote.pitch) {
+        currentNote.pitch = newPitch;
+        auditionNote(currentNote);
+      }
     }
   }
   draw();
@@ -165,6 +169,9 @@ function selectNote(note) {
   if (note && loudnessLayer.checked) {
     velocitySlider.value = note.velocity;
   }
+  if (note) {
+    auditionNote(note);
+  }
   updateControls();
 }
 
@@ -221,6 +228,22 @@ function draw() {
 }
 
 draw();
+
+function auditionNote(note) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const pitch = pitchLayer.checked ? note.pitch : defaultPitch;
+  const duration = (durationLayer.checked ? note.width : defaultWidth) * timePerPixel;
+  const velocity = (loudnessLayer.checked ? note.velocity : defaultVelocity) / 127;
+  const freq = 440 * Math.pow(2, (pitch - 69) / 12);
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  gain.gain.value = velocity;
+  osc.connect(gain).connect(ctx.destination);
+  osc.onended = () => ctx.close();
+  osc.start();
+  osc.stop(ctx.currentTime + duration);
+}
 
 function updatePlayhead() {
   if (!isPlaying || !audioCtx) return;
