@@ -28,6 +28,8 @@ let playheadX = 0;
 let playStartTime = 0;
 let playheadRAF = null;
 let timePerPixel = baseTimePerPixel;
+let auditionCtx = null;
+let auditionOsc = null;
 
 function getBeatWidth() {
   const tempo = parseInt(tempoSlider.value, 10);
@@ -230,17 +232,35 @@ function draw() {
 draw();
 
 function auditionNote(note) {
+  if (auditionCtx) {
+    try {
+      auditionOsc.stop();
+    } catch (e) {
+      // ignore if already stopped
+    }
+    auditionCtx.close();
+    auditionCtx = null;
+    auditionOsc = null;
+  }
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  auditionCtx = ctx;
   const pitch = pitchLayer.checked ? note.pitch : defaultPitch;
   const duration = (durationLayer.checked ? note.width : defaultWidth) * timePerPixel;
   const velocity = (loudnessLayer.checked ? note.velocity : defaultVelocity) / 127;
   const freq = 440 * Math.pow(2, (pitch - 69) / 12);
   const osc = ctx.createOscillator();
+  auditionOsc = osc;
   const gain = ctx.createGain();
   osc.frequency.setValueAtTime(freq, ctx.currentTime);
   gain.gain.value = velocity;
   osc.connect(gain).connect(ctx.destination);
-  osc.onended = () => ctx.close();
+  osc.onended = () => {
+    ctx.close();
+    if (auditionCtx === ctx) {
+      auditionCtx = null;
+      auditionOsc = null;
+    }
+  };
   osc.start();
   osc.stop(ctx.currentTime + duration);
 }
